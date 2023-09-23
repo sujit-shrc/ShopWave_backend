@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const auth_admin = require("./middleware/auth_admin")
 const userRoutes = require("./routes/user/index")
+const merchantRoutes = require("./routes/merchant/merchant")
 
 
 // Middlewares
@@ -19,5 +20,6 @@ app.get('/test', auth_admin, (req, res) => {
 })
 
 app.use('/user', userRoutes);
+app.use('/api/products', merchantRoutes)
 
 module.exports = app;
