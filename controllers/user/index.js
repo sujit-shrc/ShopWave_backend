@@ -121,6 +121,7 @@ const profile = (req,res) => {
     }
 }
 
+
 module.exports = {
     login,
     register,
