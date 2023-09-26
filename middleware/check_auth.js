@@ -1,32 +1,36 @@
 const pool = require("../config/db");
-
 const check_auth = (req, res, next) => {
-  //   const query =
-  //     "select role, ro from role where roleid=(select roleid from special_table where userid =(select user_id from sessions  where session_id = ? ))";
-  const query =
-    "SELECT role.role AS user_role, sessions.user_id AS session_user_id FROM role JOIN special_table ON role.roleid = special_table.roleid JOIN sessions ON special_table.userid = sessions.user_id WHERE sessions.session_id = ?";
+  try {
+    const { session_id } = req.body; // token
+    const query =
+      "SELECT role.role AS user_role, sessions.user_id AS session_user_id FROM role JOIN special_table ON role.roleid = special_table.roleid JOIN sessions ON special_table.userid = sessions.user_id WHERE sessions.session_id = ?";
 
-  const values = ["1zB6HQLT9AlN"];
+    const values = [session_id]; // token
 
-  pool.query(query, values, (error, results) => {
-    if (error) {
-      return res.status(500).json({ success: false, message: error.message });
-    }
-    if (results[0].user_role === "Admin") {
+    pool.query(query, values, (error, results) => {
+      if (error) {
+        throw error;
+      }
+      console.log(results[0])
+      if (results[0] && results[0].user_role === "Admin") {
         const data = {
-            user_role: results[0].user_role,
-            user_id: results[0].session_user_id
+          user_role: results[0].user_role,
+          user_id: results[0].session_user_id,
         };
-        req.user = data
-        console.log(data)        
-      next();
-    } else {
-      return res.status(403).send("unauthorized");
-    }
-  });
+        req.user = data;
+        console.log(data);
+        next();
+      } else {
+        return res.status(403).json({"message": "Unauthorized Access"});
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 module.exports = check_auth;
+
 
 // require('dotenv').config();
 // const jwt = require('jsonwebtoken');
